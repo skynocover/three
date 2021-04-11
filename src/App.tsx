@@ -25,14 +25,20 @@ export default function App() {
   const [mount, setMount] = React.useState<boolean>(true);
   React.useEffect(() => {
     setMount(false);
-    setTimeout(() => setMount(true), 1000);
+    setTimeout(() => setMount(true), 300);
   }, [appCtx.refresh]);
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider width={380} style={{ background: 'white' }}>
         <DashBoard />
       </Sider>
-      {mount && <Layout className="site-layout">{<Blocks />}</Layout>}
+      {mount && (
+        <Layout>
+          <Content>
+            <Blocks />
+          </Content>
+        </Layout>
+      )}
     </Layout>
   );
 }
