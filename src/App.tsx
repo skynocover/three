@@ -1,26 +1,38 @@
-import React from 'react';
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import logo from './logo.svg';
 import './App.css';
+import { AppProvider } from './appcontext';
 
-function App() {
+import { Layout, Menu, Breadcrumb } from 'antd';
+import {
+  DesktopOutlined,
+  PieChartOutlined,
+  FileOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import { AppContext, blockSettings } from './appcontext';
+import Blocks from './components/Blocks';
+import DashBoard from './components/DashBoard';
+
+const { Header, Content, Footer, Sider } = Layout;
+const { SubMenu } = Menu;
+
+export default function App() {
+  const appCtx = React.useContext(AppContext);
+  const [collapsed, setCollapsed] = React.useState<boolean>(false);
+  const [mount, setMount] = React.useState<boolean>(true);
+  React.useEffect(() => {
+    setMount(false);
+    setTimeout(() => setMount(true), 1000);
+  }, [appCtx.refresh]);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider width={380} style={{ background: 'white' }}>
+        <DashBoard />
+      </Sider>
+      {mount && <Layout className="site-layout">{<Blocks />}</Layout>}
+    </Layout>
   );
 }
-
-export default App;
