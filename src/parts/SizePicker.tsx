@@ -3,22 +3,15 @@ import ReactDOM from 'react-dom';
 import logo from './logo.svg';
 // import '../App.css';
 import { ColumnsType } from 'antd/es/table';
-import { AppContext, blockSettings } from '../appcontext';
+import { AppContext, blockSettings, Size } from '../appcontext';
 
 import { Table, Input, Button, Popconfirm, Form, Typography, InputNumber } from 'antd';
 const { Text } = Typography;
-interface Size {
-  width: number;
-  height: number;
-  length: number;
-}
 
 const SizePicker = () => {
   const appCtx = React.useContext(AppContext);
 
-  const [data, setDataSource] = React.useState<Size[]>([
-    { width: appCtx.width[0], height: appCtx.width[1], length: appCtx.width[2] },
-  ]);
+  const [data, setDataSource] = React.useState<Size[]>([appCtx.size]);
   React.useEffect(() => {
     // console.log('11111');
     // console.log({ width: appCtx.width[0], height: appCtx.width[1], length: appCtx.width[2] });
@@ -26,29 +19,29 @@ const SizePicker = () => {
   }, []);
 
   const onChange = (t: string, value: number) => {
-    console.log(`data: ${JSON.stringify(appCtx.width)}`);
+    // console.log(`data: ${JSON.stringify(appCtx.size)}`);
     switch (t) {
       case 'width':
         setDataSource((preState: Size[]) => {
           let temp = [...preState];
-          temp[0].width = value;
+          temp[0].X = value;
           return temp;
         });
-        appCtx.setWidth((preState: number[]) => {
-          let temp = [...preState];
-          temp[0] = value;
+        appCtx.setSize((preState: Size) => {
+          let temp = { ...preState };
+          temp.X = value;
           return temp;
         });
         break;
       case 'height':
         setDataSource((preState: Size[]) => {
           let temp = [...preState];
-          temp[0].height = value;
+          temp[0].Y = value;
           return temp;
         });
-        appCtx.setWidth((preState: number[]) => {
-          let temp = [...preState];
-          temp[1] = value;
+        appCtx.setSize((preState: Size) => {
+          let temp = { ...preState };
+          temp.Y = value;
           return temp;
         });
         break;
@@ -56,12 +49,12 @@ const SizePicker = () => {
       default:
         setDataSource((preState: Size[]) => {
           let temp = [...preState];
-          temp[0].length = value;
+          temp[0].Z = value;
           return temp;
         });
-        appCtx.setWidth((preState: number[]) => {
-          let temp = [...preState];
-          temp[2] = value;
+        appCtx.setSize((preState: Size) => {
+          let temp = { ...preState };
+          temp.Z = value;
           return temp;
         });
         break;
@@ -77,7 +70,7 @@ const SizePicker = () => {
         return (
           <InputNumber
             min={1}
-            defaultValue={item.width}
+            defaultValue={item.X}
             onChange={(value) => onChange('width', value)}
           />
         );
@@ -91,7 +84,7 @@ const SizePicker = () => {
         return (
           <InputNumber
             min={1}
-            defaultValue={item.height}
+            defaultValue={item.Y}
             onChange={(value) => onChange('height', value)}
           />
         );
@@ -105,7 +98,7 @@ const SizePicker = () => {
         return (
           <InputNumber
             min={1}
-            defaultValue={item.length}
+            defaultValue={item.Z}
             onChange={(value) => onChange('length', value)}
           />
         );
@@ -121,14 +114,12 @@ const SizePicker = () => {
         columns={columns}
         pagination={false}
         summary={() => {
-          let target = appCtx.width[0] * appCtx.width[1] * appCtx.width[2];
-
           return (
             <>
               <Table.Summary.Row>
                 <Table.Summary.Cell index={0}>Total blocks</Table.Summary.Cell>
                 <Table.Summary.Cell index={1}>
-                  <Text>{target}</Text>
+                  <Text>{appCtx.size.X * appCtx.size.Y * appCtx.size.Z}</Text>
                 </Table.Summary.Cell>
               </Table.Summary.Row>
             </>

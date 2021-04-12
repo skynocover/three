@@ -20,9 +20,9 @@ export default function App() {
   }, [appCtx.refresh]);
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider width={380} style={{ background: 'white' }}>
+      {/* <Sider width={380} style={{ background: 'white' }}>
         <DashBoard />
-      </Sider>
+      </Sider> */}
       {mount && (
         <Layout>
           <Content>

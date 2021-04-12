@@ -14,6 +14,12 @@ export interface blockSettings {
   num: number;
 }
 
+export interface Size {
+  X: number;
+  Y: number;
+  Z: number;
+}
+
 interface AppContextProps {
   name: string;
   setName: React.Dispatch<React.SetStateAction<string>>;
@@ -39,8 +45,8 @@ interface AppContextProps {
 
   blocks: blockSettings[];
   setBlocks: React.Dispatch<React.SetStateAction<blockSettings[]>>;
-  width: number[];
-  setWidth: React.Dispatch<React.SetStateAction<number[]>>;
+  size: Size;
+  setSize: React.Dispatch<React.SetStateAction<Size>>;
   refresh: boolean;
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -65,7 +71,7 @@ const AppProvider = ({ children }: AppProviderProps) => {
   const [gameState, setGameState] = React.useState<string>('beforeStart');
 
   const [blocks, setBlocks] = React.useState<blockSettings[]>(initSetting);
-  const [width, setWidth] = React.useState<number[]>([4, 4, 4]);
+  const [size, setSize] = React.useState<Size>({ X: 4, Y: 4, Z: 4 });
 
   const [handCard, setHandCard] = React.useState<string[]>([]);
 
@@ -166,8 +172,8 @@ const AppProvider = ({ children }: AppProviderProps) => {
 
         blocks,
         setBlocks,
-        width,
-        setWidth,
+        size,
+        setSize,
 
         refresh,
         setRefresh,

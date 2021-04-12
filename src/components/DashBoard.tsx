@@ -223,12 +223,15 @@ const DashBoard = () => {
   return (
     <>
       <SizePicker />
-      <Button onClick={newSetting} type="primary" style={{ marginTop: 5 }}>
-        Add one color
-      </Button>
-      <Button onClick={refresh} type="primary">
-        Refresh
-      </Button>
+      <div style={{ display: 'flex', marginTop: 5, marginBottom: 5 }}>
+        <Button onClick={newSetting} type="primary" style={{ marginRight: 5 }}>
+          Add one color
+        </Button>
+        <Button onClick={refresh} type="primary">
+          Refresh
+        </Button>
+      </div>
+
       <Table
         components={components}
         rowClassName={() => 'editable-row'}
@@ -241,9 +244,7 @@ const DashBoard = () => {
           pageData.forEach((item: any) => {
             totalNumber += Number(item.num);
           });
-          console.log(`width: ${JSON.stringify(appCtx.width)}`);
-          let target = appCtx.width[0] * appCtx.width[1] * appCtx.width[2];
-          console.log(`target: ${target}, total number: ${totalNumber}`);
+          let target = appCtx.size.X * appCtx.size.Y * appCtx.size.Z;
 
           return (
             <>

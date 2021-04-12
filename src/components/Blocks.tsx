@@ -26,12 +26,12 @@ const Blocks = () => {
   const mouse = new THREE.Vector2();
   raycaster.setFromCamera(mouse, camera);
 
-  let boxs = Array(appCtx.width[0])
+  let boxs = Array(appCtx.size.X)
     .fill(null)
     .map((item) =>
-      Array(appCtx.width[1])
+      Array(appCtx.size.Y)
         .fill(0)
-        .map((item) => Array(appCtx.width[2]).fill(0)),
+        .map((item) => Array(appCtx.size.Z).fill(0)),
     );
 
   const onMouseMove = (event: any) => {
@@ -39,7 +39,7 @@ const Blocks = () => {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
   };
 
-  function handleClick(e: any) {
+  const handleClick = (e: any) => {
     e.preventDefault();
 
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -48,22 +48,23 @@ const Blocks = () => {
 
     raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
 
-    boxs.forEach((item) => {
-      item.forEach((item) => {
-        var intersects = raycaster.intersectObjects(item);
+    let SELECTED = ((): THREE.Object3D | null => {
+      for (const item of boxs) {
+        for (const item2 of item) {
+          const intersects = raycaster.intersectObjects(item2);
 
-        if (intersects.length > 0) {
-          let SELECTED = intersects[0].object;
-          // console.log('SELECTED: ', JSON.stringify(SELECTED));
-          console.log('SELECTED: ', JSON.stringify(SELECTED.position));
-          // var intersected = intersects[0].object;
-          // console.log(intersects[0].object);
-          return;
+          if (intersects.length > 0) {
+            return intersects[0].object;
+          }
         }
-        // });
-      });
-    });
-  }
+      }
+      return null;
+    })();
+
+    if (SELECTED !== null) {
+      console.log('POSITION: ', JSON.stringify(SELECTED.position));
+    }
+  };
 
   let blockColor: number[] = [];
   for (const s of appCtx.blocks) {
@@ -83,9 +84,9 @@ const Blocks = () => {
     const material = new THREE.MeshStandardMaterial({ color: 0x7e31eb }); // 材質
 
     let ii = 0;
-    for (let i = 0; i < appCtx.width[0]; i++) {
-      for (let j = 0; j < appCtx.width[1]; j++) {
-        for (let k = 0; k < appCtx.width[2]; k++) {
+    for (let i = 0; i < appCtx.size.X; i++) {
+      for (let j = 0; j < appCtx.size.Y; j++) {
+        for (let k = 0; k < appCtx.size.Z; k++) {
           let material = new THREE.MeshStandardMaterial({ color: blockColor[ii] }); // 材質
           ii++;
           let cube = new THREE.Mesh(geometry, material);
