@@ -10,36 +10,68 @@ import { AppContext, blockSettings } from '../appcontext';
 // raycast
 
 const Blocks = () => {
-  // const [scene, setSence] = React.useState<THREE.Scene>(new THREE.Scene());
-  const [renderer, setRenderer] = React.useState<THREE.WebGLRenderer>(new THREE.WebGLRenderer());
+  // const [renderer, setRenderer] = React.useState<THREE.WebGLRenderer>(new THREE.WebGLRenderer());
 
   const appCtx = React.useContext(AppContext);
   const mount: any = React.useRef(null);
-  // const renderer = new THREE.WebGLRenderer();
+  const renderer = new THREE.WebGLRenderer();
   const scene = new THREE.Scene();
-  // setSence(new THREE.Scene());
   const camera = new THREE.PerspectiveCamera(
     75, //fov (degree)
     window.innerWidth / window.innerHeight, //aspect ratio (螢幕比例)
     0.1, //near
     1000, //far
   );
+  let raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  raycaster.setFromCamera(mouse, camera);
 
-  let setting = appCtx.blocks;
+  let boxs = Array(appCtx.width[0])
+    .fill(null)
+    .map((item) =>
+      Array(appCtx.width[1])
+        .fill(0)
+        .map((item) => Array(appCtx.width[2]).fill(0)),
+    );
 
-  const init = () => {};
+  const onMouseMove = (event: any) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  };
 
-  // React.useEffect(() => {
-  //   // setRenderer(new THREE.WebGLRenderer());
-  //   // renderer.clear();
-  //   // renderer.render(scene, camera);
-  //   setRenderer(() => {
-  //     let temp = new THREE.WebGLRenderer();
-  //     temp.clear();
-  //     temp.render(scene, camera);
-  //     return temp;
-  //   });
-  // }, [appCtx.refresh]);
+  function handleClick(e: any) {
+    e.preventDefault();
+
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    const vector = new THREE.Vector3(mouse.x, mouse.y, 0.5).unproject(camera);
+
+    raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+
+    boxs.forEach((item) => {
+      item.forEach((item) => {
+        var intersects = raycaster.intersectObjects(item);
+
+        if (intersects.length > 0) {
+          let SELECTED = intersects[0].object;
+          // console.log('SELECTED: ', JSON.stringify(SELECTED));
+          console.log('SELECTED: ', JSON.stringify(SELECTED.position));
+          // var intersected = intersects[0].object;
+          // console.log(intersects[0].object);
+          return;
+        }
+        // });
+      });
+    });
+  }
+
+  let blockColor: number[] = [];
+  for (const s of appCtx.blocks) {
+    for (let i = 0; i < s.num; i++) {
+      blockColor.push(s.colors);
+    }
+  }
+  shuffle(blockColor);
 
   React.useEffect(() => {
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -50,23 +82,6 @@ const Blocks = () => {
     const geometry = new THREE.BoxGeometry(1, 1, 1); // 幾何
     const material = new THREE.MeshStandardMaterial({ color: 0x7e31eb }); // 材質
 
-    let blockColor: number[] = [];
-    for (const s of setting) {
-      for (let i = 0; i < s.num; i++) {
-        blockColor.push(s.colors);
-      }
-    }
-
-    shuffle(blockColor);
-
-    let boxs = Array(appCtx.width[0])
-      .fill(null)
-      .map((item) =>
-        Array(appCtx.width[1])
-          .fill(0)
-          .map((item) => Array(appCtx.width[2]).fill(0)),
-      );
-
     let ii = 0;
     for (let i = 0; i < appCtx.width[0]; i++) {
       for (let j = 0; j < appCtx.width[1]; j++) {
@@ -74,11 +89,12 @@ const Blocks = () => {
           let material = new THREE.MeshStandardMaterial({ color: blockColor[ii] }); // 材質
           ii++;
           let cube = new THREE.Mesh(geometry, material);
-          cube.position.set(
-            i - appCtx.width[0] / 2,
-            j - appCtx.width[1] / 2,
-            k - appCtx.width[2] / 2,
-          );
+          cube.position.set(i, j, k);
+          // cube.position.set(
+          //   i - appCtx.width[0] / 2,
+          //   j - appCtx.width[1] / 2,
+          //   k - appCtx.width[2] / 2,
+          // );
           boxs[i][j][k] = cube;
           scene.add(cube);
         }
@@ -104,7 +120,7 @@ const Blocks = () => {
     animate();
   }, []);
 
-  return <div ref={mount} />;
+  return <div ref={mount} onClick={handleClick} onMouseMove={onMouseMove} onMouseOut={() => {}} />;
 };
 
 export default Blocks;
