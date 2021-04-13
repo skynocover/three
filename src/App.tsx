@@ -5,7 +5,7 @@ import './App.css';
 
 import { Layout, Menu, Breadcrumb } from 'antd';
 
-import { AppContext, blockSettings } from './appcontext';
+import { AppContext, blockSettings, blockColor } from './appcontext';
 import Blocks from './components/Blocks';
 import DashBoard from './components/DashBoard';
 
@@ -18,6 +18,7 @@ export default function App() {
     setMount(false);
     setTimeout(() => setMount(true), 100);
   }, [appCtx.refresh]);
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       {/* <Sider width={380} style={{ background: 'white' }}>
@@ -26,7 +27,7 @@ export default function App() {
       {mount && (
         <Layout>
           <Content>
-            <Blocks />
+            <Blocks blockColor={blockColor()} />
           </Content>
         </Layout>
       )}

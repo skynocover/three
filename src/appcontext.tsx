@@ -49,7 +49,13 @@ interface AppContextProps {
   setSize: React.Dispatch<React.SetStateAction<Size>>;
   refresh: boolean;
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+  remove: number[][];
+  setRomove: React.Dispatch<React.SetStateAction<number[][]>>;
 }
+
+export const blockColor = () => _blockColor;
+
+const _blockColor: number[] = [];
 
 const AppContext = React.createContext<AppContextProps>(undefined!);
 
@@ -60,7 +66,7 @@ const initSetting: blockSettings[] = [
   { key: 0, name: 'ground', colors: 0x68311d, num: 18 },
   { key: 1, name: 'grey', colors: 0x918881, num: 14 },
   { key: 2, name: 'sand', colors: 0xe4cb89, num: 12 },
-  { key: 3, name: 'black', colors: 0x1b1612, num: 10 },
+  // { key: 3, name: 'black', colors: 0x1b1612, num: 10 },
   { key: 4, name: 'green', colors: 0x0f6421, num: 10 },
 ];
 
@@ -71,7 +77,8 @@ const AppProvider = ({ children }: AppProviderProps) => {
   const [gameState, setGameState] = React.useState<string>('beforeStart');
 
   const [blocks, setBlocks] = React.useState<blockSettings[]>(initSetting);
-  const [size, setSize] = React.useState<Size>({ X: 4, Y: 4, Z: 4 });
+  const [size, setSize] = React.useState<Size>({ X: 3, Y: 3, Z: 3 });
+  // const [size, setSize] = React.useState<Size>({ X: 4, Y: 4, Z: 4 });
 
   const [handCard, setHandCard] = React.useState<string[]>([]);
 
@@ -84,11 +91,20 @@ const AppProvider = ({ children }: AppProviderProps) => {
   const [login, setLogin] = React.useState<boolean>(false);
 
   const [refresh, setRefresh] = React.useState<boolean>(false);
+  const [remove, setRomove] = React.useState<number[][]>([]);
+
   /////////////////////////////////////////////////////
 
   React.useEffect(() => {
     axios.defaults.baseURL = '';
     axios.defaults.headers.common['Content-Type'] = 'application/json';
+    // let blockColor: number[] = [];
+    for (const s of blocks) {
+      for (let i = 0; i < s.num; i++) {
+        _blockColor.push(s.colors);
+      }
+    }
+    shuffle(_blockColor);
   }, []);
 
   const fetch = async (method: 'get' | 'post' | 'put' | 'delete', url: string, param?: any) => {
@@ -177,6 +193,9 @@ const AppProvider = ({ children }: AppProviderProps) => {
 
         refresh,
         setRefresh,
+
+        remove,
+        setRomove,
       }}
     >
       {children}
@@ -185,3 +204,11 @@ const AppProvider = ({ children }: AppProviderProps) => {
 };
 
 export { AppContext, AppProvider };
+
+// Fisher-Yates ...
+function shuffle(array: any[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}

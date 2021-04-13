@@ -7,11 +7,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as THREE from 'three';
 import { AppContext, blockSettings } from '../appcontext';
 
+const swal = require('sweetalert');
+
 // raycast
 
-const Blocks = () => {
+const Blocks = ({ blockColor }: { blockColor: number[] }) => {
   // const [renderer, setRenderer] = React.useState<THREE.WebGLRenderer>(new THREE.WebGLRenderer());
-
   const appCtx = React.useContext(AppContext);
   const mount: any = React.useRef(null);
   const renderer = new THREE.WebGLRenderer();
@@ -62,17 +63,35 @@ const Blocks = () => {
     })();
 
     if (SELECTED !== null) {
-      console.log('POSITION: ', JSON.stringify(SELECTED.position));
+      swal('Take the cube', {
+        buttons: {
+          check: 'check!',
+          cancel: 'cancel',
+        },
+      })
+        .then((value: string) => {
+          switch (value) {
+            case 'check':
+              console.log('POSITION: ', JSON.stringify(SELECTED?.position));
+              appCtx.setRomove((preState: number[][]) => {
+                if (SELECTED?.position) {
+                  return [
+                    ...preState,
+                    [SELECTED.position.x, SELECTED.position.y, SELECTED.position.z],
+                  ];
+                } else {
+                  return [...preState];
+                }
+              });
+
+              break;
+          }
+        })
+        .then(() => {
+          appCtx.setRefresh(!appCtx.refresh);
+        });
     }
   };
-
-  let blockColor: number[] = [];
-  for (const s of appCtx.blocks) {
-    for (let i = 0; i < s.num; i++) {
-      blockColor.push(s.colors);
-    }
-  }
-  shuffle(blockColor);
 
   React.useEffect(() => {
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -104,6 +123,11 @@ const Blocks = () => {
 
     controls.update();
 
+    for (const item of appCtx.remove) {
+      console.log(`remove ${item[0]},${item[1]},${item[2]}`);
+      scene.remove(boxs[item[0]][item[1]][item[2]]);
+    }
+
     const light = new THREE.HemisphereLight(0xffffbb, 0x808080, 1); // 半圓球環境光
     scene.add(light);
     camera.position.x = 0;
@@ -116,20 +140,15 @@ const Blocks = () => {
       // cube.rotation.x += 0.01;
       // cube.rotation.y += 0.01;
       // cube.rotation.z += 0.01;
+      renderer.clear();
       renderer.render(scene, camera);
     };
     animate();
   }, []);
 
+  // React.useEffect(() => {}, [appCtx.refresh]);
+
   return <div ref={mount} onClick={handleClick} onMouseMove={onMouseMove} onMouseOut={() => {}} />;
 };
 
 export default Blocks;
-
-// Fisher-Yates ...
-function shuffle(array: any[]) {
-  for (let i = array.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
