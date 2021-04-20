@@ -53,9 +53,7 @@ interface AppContextProps {
   setRomove: React.Dispatch<React.SetStateAction<number[][]>>;
 }
 
-export const blockColor = () => _blockColor;
-
-const _blockColor: number[] = [];
+// export const blockColor = () => _blockColor;
 
 const AppContext = React.createContext<AppContextProps>(undefined!);
 
@@ -99,12 +97,6 @@ const AppProvider = ({ children }: AppProviderProps) => {
     axios.defaults.baseURL = '';
     axios.defaults.headers.common['Content-Type'] = 'application/json';
     // let blockColor: number[] = [];
-    for (const s of blocks) {
-      for (let i = 0; i < s.num; i++) {
-        _blockColor.push(s.colors);
-      }
-    }
-    shuffle(_blockColor);
   }, []);
 
   const fetch = async (method: 'get' | 'post' | 'put' | 'delete', url: string, param?: any) => {
@@ -204,11 +196,3 @@ const AppProvider = ({ children }: AppProviderProps) => {
 };
 
 export { AppContext, AppProvider };
-
-// Fisher-Yates ...
-function shuffle(array: any[]) {
-  for (let i = array.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}

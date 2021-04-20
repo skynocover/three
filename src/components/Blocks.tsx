@@ -9,10 +9,7 @@ import { AppContext, blockSettings } from '../appcontext';
 
 const swal = require('sweetalert');
 
-// raycast
-
-const Blocks = ({ blockColor }: { blockColor: number[] }) => {
-  // const [renderer, setRenderer] = React.useState<THREE.WebGLRenderer>(new THREE.WebGLRenderer());
+const Blocks = () => {
   const appCtx = React.useContext(AppContext);
   const mount: any = React.useRef(null);
   const renderer = new THREE.WebGLRenderer();
@@ -23,9 +20,8 @@ const Blocks = ({ blockColor }: { blockColor: number[] }) => {
     0.1, //near
     1000, //far
   );
-  let raycaster = new THREE.Raycaster();
+  // let raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
-  raycaster.setFromCamera(mouse, camera);
 
   let boxs = Array(appCtx.size.X)
     .fill(null)
@@ -47,53 +43,67 @@ const Blocks = ({ blockColor }: { blockColor: number[] }) => {
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
     const vector = new THREE.Vector3(mouse.x, mouse.y, 0.5).unproject(camera);
 
-    raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
-
-    let SELECTED = ((): THREE.Object3D | null => {
+    const raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+    raycaster.setFromCamera(mouse, camera);
+    let SELECTED = ((): THREE.Intersection[] => {
       for (const item of boxs) {
         for (const item2 of item) {
           const intersects = raycaster.intersectObjects(item2);
 
           if (intersects.length > 0) {
-            return intersects[0].object;
+            // console.log(`intersects: ${JSON.stringify(intersects)}`);
+            return intersects.sort((a, b) => {
+              return a.distance * 1000 - b.distance * 1000;
+            });
           }
         }
       }
-      return null;
-    })();
+      return [];
+    })()[0];
 
-    if (SELECTED !== null) {
+    if (SELECTED) {
       swal('Take the cube', {
         buttons: {
           check: 'check!',
           cancel: 'cancel',
         },
-      })
-        .then((value: string) => {
-          switch (value) {
-            case 'check':
-              console.log('POSITION: ', JSON.stringify(SELECTED?.position));
-              appCtx.setRomove((preState: number[][]) => {
-                if (SELECTED?.position) {
-                  return [
-                    ...preState,
-                    [SELECTED.position.x, SELECTED.position.y, SELECTED.position.z],
-                  ];
-                } else {
-                  return [...preState];
-                }
-              });
+      }).then((value: string) => {
+        switch (value) {
+          case 'check':
+            if (SELECTED) {
+              console.log('POSITION: ', JSON.stringify(SELECTED.object.position));
+              scene.remove(
+                boxs[SELECTED.object.position.x][SELECTED.object.position.y][
+                  SELECTED.object.position.z
+                ],
+              );
+            }
+            // appCtx.setRomove((preState: number[][]) => {
+            //   if (SELECTED?.position) {
+            //     return [
+            //       ...preState,
+            //       [SELECTED.position.x, SELECTED.position.y, SELECTED.position.z],
+            //     ];
+            //   } else {
+            //     return [...preState];
+            //   }
+            // });
 
-              break;
-          }
-        })
-        .then(() => {
-          appCtx.setRefresh(!appCtx.refresh);
-        });
+            break;
+        }
+      });
     }
   };
 
   React.useEffect(() => {
+    const blockColors: number[] = [];
+    for (const s of appCtx.blocks) {
+      for (let i = 0; i < s.num; i++) {
+        blockColors.push(s.colors);
+      }
+    }
+    shuffle(blockColors);
+
     renderer.setSize(window.innerWidth, window.innerHeight);
     mount.current.appendChild(renderer.domElement);
 
@@ -106,7 +116,7 @@ const Blocks = ({ blockColor }: { blockColor: number[] }) => {
     for (let i = 0; i < appCtx.size.X; i++) {
       for (let j = 0; j < appCtx.size.Y; j++) {
         for (let k = 0; k < appCtx.size.Z; k++) {
-          let material = new THREE.MeshStandardMaterial({ color: blockColor[ii] }); // 材質
+          let material = new THREE.MeshStandardMaterial({ color: blockColors[ii] }); // 材質
           ii++;
           let cube = new THREE.Mesh(geometry, material);
           cube.position.set(i, j, k);
@@ -146,9 +156,15 @@ const Blocks = ({ blockColor }: { blockColor: number[] }) => {
     animate();
   }, []);
 
-  // React.useEffect(() => {}, [appCtx.refresh]);
-
   return <div ref={mount} onClick={handleClick} onMouseMove={onMouseMove} onMouseOut={() => {}} />;
 };
 
 export default Blocks;
+
+// Fisher-Yates ...
+function shuffle(array: any[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
